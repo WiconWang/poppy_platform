@@ -7,9 +7,9 @@
 include "./vendor/autoload.php";
 \EasySwoole\EasySwoole\Core::getInstance()->initialize();
 // 生成核心base
-$init = new \AutomaticGeneration\Init();
-$init->initBaseModel();
-$init->initBaseController();
+//$init = new \AutomaticGeneration\Init();
+//$init->initBaseModel();
+//$init->initBaseController();
 
 
 
@@ -23,7 +23,7 @@ $mysqlConfig = new \EasySwoole\Mysqli\Config($DBConfig);
 go(function () {
     $db = \EasySwoole\MysqliPool\Mysql::defer('mysql');
     $result = $db->rawQuery("show tables;");
-    $tableList = array_column($result,'Tables_in_easytest');
+    $tableList = array_column($result,'Tables_in_poppy');
     //生成所有的bean，model
 
     foreach ($tableList as $tableName){
@@ -68,7 +68,7 @@ go(function () {
         $controllerConfig->setTableName($tableName);
         $controllerConfig->setTableComment($tableComment);
         $controllerConfig->setTableColumns($tableColumns);
-        $controllerConfig->setExtendClass("App\\HttpController\\Base");
+        $controllerConfig->setExtendClass("App\\HttpController".$path."\\Base");
         $controllerConfig->setModelClass($modelBuilder->getClassName());
         $controllerConfig->setBeanClass($beanBuilder->getClassName());
         $controllerConfig->setMysqlPoolClass(EasySwoole\MysqliPool\Mysql::class);
@@ -76,38 +76,23 @@ go(function () {
         $controllerBuilder = new \AutomaticGeneration\ControllerBuilder($controllerConfig);
         $result = $controllerBuilder->generateController();
         echo "> 已处理：$result".PHP_EOL;
-//
-//        $path='\\Index';
-//        $controllerConfig = new \AutomaticGeneration\Config\ControllerConfig();
-//        $controllerConfig->setBaseNamespace("App\\HttpController".$path);
-//        $controllerConfig->setTablePre($DBConfig['prefix);
-//        $controllerConfig->setTableName($tableName);
-//        $controllerConfig->setTableComment($tableComment);
-//        $controllerConfig->setTableColumns($tableColumns);
-//        $controllerConfig->setExtendClass("App\\HttpController".$path."\\Base");
-//        $controllerConfig->setModelClass($modelBuilder->getClassName());
-//        $controllerConfig->setBeanClass($beanBuilder->getClassName());
-//        $controllerConfig->setMysqlPoolClass(EasySwoole\MysqliPool\Mysql::class);
-//        $controllerConfig->setMysqlPoolName('mysql');
-//        $controllerBuilder = new \AutomaticGeneration\ControllerBuilder($controllerConfig);
-//        $result = $controllerBuilder->generateController();
-//
-//        var_dump($result);
-//        $path='\\User';
-//        $controllerConfig = new \AutomaticGeneration\Config\ControllerConfig();
-//        $controllerConfig->setBaseNamespace("App\\HttpController".$path);
-//        $controllerConfig->setTablePre($DBConfig['prefix);
-//        $controllerConfig->setTableName($tableName);
-//        $controllerConfig->setTableComment($tableComment);
-//        $controllerConfig->setTableColumns($tableColumns);
-//        $controllerConfig->setExtendClass("App\\HttpController".$path."\\Base");
-//        $controllerConfig->setModelClass($modelBuilder->getClassName());
-//        $controllerConfig->setBeanClass($beanBuilder->getClassName());
-//        $controllerConfig->setMysqlPoolClass(EasySwoole\MysqliPool\Mysql::class);
-//        $controllerConfig->setMysqlPoolName('mysql');
-//        $controllerBuilder = new \AutomaticGeneration\ControllerBuilder($controllerConfig);
-//        $result = $controllerBuilder->generateController();
-//        var_dump($result);
+
+        var_dump($result);
+        $path='\\User';
+        $controllerConfig = new \AutomaticGeneration\Config\ControllerConfig();
+        $controllerConfig->setBaseNamespace("App\\HttpController".$path);
+        $controllerConfig->setTablePre(\EasySwoole\EasySwoole\Config::getInstance()->getConf('MYSQL.prefix'));
+        $controllerConfig->setTableName($tableName);
+        $controllerConfig->setTableComment($tableComment);
+        $controllerConfig->setTableColumns($tableColumns);
+        $controllerConfig->setExtendClass("App\\HttpController".$path."\\Base");
+        $controllerConfig->setModelClass($modelBuilder->getClassName());
+        $controllerConfig->setBeanClass($beanBuilder->getClassName());
+        $controllerConfig->setMysqlPoolClass(EasySwoole\MysqliPool\Mysql::class);
+        $controllerConfig->setMysqlPoolName('mysql');
+        $controllerBuilder = new \AutomaticGeneration\ControllerBuilder($controllerConfig);
+        $result = $controllerBuilder->generateController();
+        var_dump($result);
     }
     exit;
 });
