@@ -1,0 +1,8 @@
+composer.lock
+dev.php
+.idea
+vendor
+Temp/*
+!Temp/.gitignore
+Log/*
+!Log/.gitignore
