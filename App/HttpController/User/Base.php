@@ -2,6 +2,9 @@
 
 namespace App\HttpController\User;
 
+use App\Config\ReturnCode;
+use App\Utilities\ResponseHelper;
+
 /**
  * BaseController
  * Class Base
@@ -9,29 +12,31 @@ namespace App\HttpController\User;
  */
 abstract class Base extends \EasySwoole\Http\AbstractInterface\Controller
 {
-	public function index()
-	{
-		$this->actionNotFound('index');
-	}
+    use ResponseHelper;
+
+    public function index()
+    {
+        $this->actionNotFound('index');
+    }
 
 
-	public function onRequest(?string $action): ?bool
-	{
-		if (!parent::onRequest($action)) {
-		    return false;
-		};
-		/*
-		* 各个action的参数校验
-		*/
-		$v = $this->getValidateRule($action);
-		if ($v && !$this->validate($v)) {
-		    $this->writeJson(\EasySwoole\Http\Message\Status::CODE_BAD_REQUEST, ['errorCode' => 1, 'data' => []], $v->getError()->__toString());
-		    return false;
-		}
-		return true;
-	}
+    public function onRequest(?string $action): ?bool
+    {
+        if (!parent::onRequest($action)) {
+            return false;
+        };
+        /*
+        * 各个action的参数校验
+        */
+        $v = $this->getValidateRule($action);
+        if ($v && !$this->validate($v)) {
+            $this->responseJson(ReturnCode::PARAM_ERROR, $v->getError()->__toString(), []);
+            return false;
+        }
+        return true;
+    }
 
 
-	abstract protected function getValidateRule(?string $action): ?\EasySwoole\Validate\Validate;
+    abstract protected function getValidateRule(?string $action): ?\EasySwoole\Validate\Validate;
 }
 

@@ -17,9 +17,11 @@ class ExceptionHandler
 
     public static function handle(\Throwable $exception, Request $request, Response $response)
     {
+        $code = $exception->getCode();
+        if ($exception->getMessage() == 'swoole exit') $code = ReturnCode::ERROR;
         if (!$response->isEndResponse()) {
             $data = Array(
-                "code"   => $exception->getCode(),
+                "code"   => $code,
                 "result" => array(
                     'file'   => $exception->getFile(),
                     'line'   => $exception->getLine(),

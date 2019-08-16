@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Model;
+use App\Bean\{
+    MemberBean
+};
 
 /**
  * 用户总表
@@ -13,6 +16,7 @@ class MemberModel extends BaseModel
 
 	protected $primaryKey = 'id';
 
+    protected $openField  = ['id', 'username', 'mobile', 'email', 'photo', 'status', 'last_login', 'created_at', 'updated_at'];
 
 	/**
 	 * @getAll
@@ -23,7 +27,7 @@ class MemberModel extends BaseModel
 	 * @param  string  $field  *
 	 * @return array[total,list]
 	 */
-	public function getAll(int $page = 1, string $keyword = null, int $pageSize = 10, string $field = '*'): array
+	public function getAll(int $page = 1, string $keyword = null, int $pageSize = 10): array
 	{
 		if (!empty($keyword)) {
 		    $this->getDb()->where('mobile', '%' . $keyword . '%', 'like');
@@ -31,7 +35,7 @@ class MemberModel extends BaseModel
 		$list = $this->getDb()
 		    ->withTotalCount()
 		    ->orderBy($this->primaryKey, 'DESC')
-		    ->get($this->table, [$pageSize * ($page  - 1), $pageSize],$field);
+		    ->get($this->table, [$pageSize * ($page  - 1), $pageSize], implode(',', $this->openField));
 		$total = $this->getDb()->getTotalCount();
 		return ['total' => $total, 'list' => $list];
 	}
