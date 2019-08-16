@@ -15,13 +15,13 @@ namespace App\Bean;
  * @property string media_name | 媒体
  * @property mixed apply_at | 申请日期
  * @property mixed audit_at | 审核日期
- * @property int charge_no | 出账公司编码
+ * @property string charge_no | 出账公司编码
  * @property string charge_name | 出账公司名称
  * @property string department_no | 部门编码
  * @property string department_name | 部门名称
- * @property int order_id | 申请人工号
+ * @property string order_id | 申请人工号
  * @property string order_name | 申请人姓名
- * @property int audit_id | 审核人工号
+ * @property string audit_id | 审核人工号
  * @property string audit_name | 审核人姓名
  * @property string project_id | 费用项目编码
  * @property string project_name | 费用项目名称

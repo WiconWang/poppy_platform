@@ -47,7 +47,10 @@ class Router extends AbstractRouter
 //            return false;//不再往下请求,结束此次响应
 //        });
         $r->addGroup('/admin/v1', function (RouteCollector $r) {
-//            $r->addRoute('GET', '/admins', 'getAll');
+            $r->post('/login', '/Admin/Login/checkLogin');
+
+
+
             $r->addGroup('/admins', function (RouteCollector $r) {
                 $r->get('/info', '/Admin/Admin/getAll');
                 $r->get('/info/{id:\d+}', '/Admin/Admin/getOne');
@@ -64,13 +67,28 @@ class Router extends AbstractRouter
                 $r->delete('/info/{id:\d+}', '/Admin/Member/delete');
             });
 
-//            $r->get('/info/{id:\d+}', function (Request $request, Response $response) {
-//                $response->write("this is info info ,your id is {$request->getQueryParam('id')}");//获取到路由匹配的id
-//                return false;//不再往下请求,结束此次响应
-//            });
-            $r->addRoute('GET', '/do-something', 'handler');
-            $r->addRoute('GET', '/do-another-thing', 'handler');
-            $r->addRoute('GET', '/do-something-else', 'handler');
+            $r->addGroup('/medias', function (RouteCollector $r) {
+                $r->get('/info', '/Admin/NewsMedia/getAll');
+                $r->get('/info/{id:\d+}', '/Admin/NewsMedia/getOne');
+                $r->post('/info', '/Admin/NewsMedia/add');
+                $r->put('/info/{id:\d+}', '/Admin/NewsMedia/update');
+                $r->delete('/info/{id:\d+}', '/Admin/NewsMedia/delete');
+            });
+
+        });
+
+
+
+
+        $r->addGroup('/user/v1', function (RouteCollector $r) {
+            $r->post('/getSMS', '/User/Login/getSMS');
+            $r->post('/login', '/User/Login/checkLogin');
+
+            $r->addGroup('/medias', function (RouteCollector $r) {
+                $r->get('/info', '/User/NewsMedia/getAll');
+                $r->get('/info/{id:\d+}', '/User/NewsMedia/getOne');
+            });
+
         });
     }
 }

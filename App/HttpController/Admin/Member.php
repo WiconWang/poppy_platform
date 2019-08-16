@@ -47,7 +47,7 @@ class Member extends Base
         $param = $this->request()->getRequestParam();
         $model = new MemberModel($db);
 
-        $data = $model->getAll(1, $param['mobile'], 1);
+        $data = $model->getAll(1, ['mobile' => $param['mobile']], 1);
         if (!empty($data) && $data['total'] > 0) {
             $this->responseJson(ReturnCode::USER_MOBILE_EXIST);
             return false;
@@ -57,8 +57,8 @@ class Member extends Base
         $bean->setUsername($param['username']);
         $bean->setMobile($param['mobile']);
         $bean->setEmail($param['email']);
-        $bean->setPassword(md5($param['password']));
-        $bean->setPhoto($param['photo']);
+        $bean->setPassword(password_hash($param['password'], PASSWORD_DEFAULT));
+        $bean->setPhoto($param['photo'] ?? '');
         $bean->setSignature($param['signature'] ?? '');
         $bean->setStatus($param['status']);
 //        $bean->setLastLogin($param['last_login'] ?? NULL);
@@ -115,7 +115,7 @@ class Member extends Base
         $updateBean->setUsername($param['username'] ?? $bean->getUsername());
         $updateBean->setMobile($param['mobile'] ?? $bean->getMobile());
         $updateBean->setEmail($param['email'] ?? $bean->getEmail());
-        $updateBean->setPassword($param['password'] ? md5($param['password']) : $bean->getPassword());
+        $updateBean->setPassword($param['password'] ? password_hash($param['password'], PASSWORD_DEFAULT) : $bean->getPassword());
         $updateBean->setPhoto($param['photo'] ?? $bean->getPhoto());
         $updateBean->setSignature($param['signature'] ?? $bean->getSignature());
         $updateBean->setStatus($param['status'] ?? $bean->getStatus());
@@ -185,7 +185,7 @@ class Member extends Base
         $page = (int)($param['page'] ?? 1);
         $limit = (int)($param['limit'] ?? 20);
         $model = new MemberModel($db);
-        $data = $model->getAll($page, $param['mobile'] ?? null, $limit);
+        $data = $model->getAll($page, $param ?? [], $limit);
         $this->responseJson(ReturnCode::SUCCESS, '', $data);
     }
 

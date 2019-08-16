@@ -18,24 +18,31 @@ class MemberModel extends BaseModel
 
     protected $openField  = ['id', 'username', 'mobile', 'email', 'photo', 'status', 'last_login', 'created_at', 'updated_at'];
 
-	/**
-	 * @getAll
-	 * @keyword mobile
-	 * @param  int  $page  1
-	 * @param  string  $keyword
-	 * @param  int  $pageSize  10
-	 * @param  string  $field  *
-	 * @return array[total,list]
-	 */
-	public function getAll(int $page = 1, string $keyword = null, int $pageSize = 10): array
+    /**
+     * @getAll
+     * @keyword mobile
+     * @param  int $page 1
+     * @param array $keyword
+     * @param  int $pageSize 10
+     * @param bool $allowAllField
+     * @return array[total,list]
+     * @throws \EasySwoole\Mysqli\Exceptions\ConnectFail
+     * @throws \EasySwoole\Mysqli\Exceptions\Option
+     * @throws \EasySwoole\Mysqli\Exceptions\OrderByFail
+     * @throws \EasySwoole\Mysqli\Exceptions\PrepareQueryFail
+     * @throws \Throwable
+     */
+	public function getAll(int $page = 1, array $keyword = [], int $pageSize = 10, bool $allowAllField = false): array
 	{
-		if (!empty($keyword)) {
-		    $this->getDb()->where('mobile', '%' . $keyword . '%', 'like');
+        if (!empty($keyword)) {
+            if (isset($keyword['mobile']))
+                $this->getDb()->where('mobile', $keyword['mobile']);
 		}
+        $fields = $allowAllField ? '*' : $this->openField;
 		$list = $this->getDb()
 		    ->withTotalCount()
 		    ->orderBy($this->primaryKey, 'DESC')
-		    ->get($this->table, [$pageSize * ($page  - 1), $pageSize], implode(',', $this->openField));
+		    ->get($this->table, [$pageSize * ($page  - 1), $pageSize], $fields);
 		$total = $this->getDb()->getTotalCount();
 		return ['total' => $total, 'list' => $list];
 	}

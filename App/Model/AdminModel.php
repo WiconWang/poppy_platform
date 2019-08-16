@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Model;
+
 use App\Bean\{
     AdminBean
 };
@@ -21,20 +22,27 @@ class AdminModel extends BaseModel
      * @getAll
      * @keyword mobile
      * @param  int $page 1
-     * @param  string $keyword
+     * @param array $keyword
      * @param  int $pageSize 10
-     * @param  string $field *
+     * @param bool $allowAllField
      * @return array[total,list]
+     * @throws \EasySwoole\Mysqli\Exceptions\ConnectFail
+     * @throws \EasySwoole\Mysqli\Exceptions\Option
+     * @throws \EasySwoole\Mysqli\Exceptions\OrderByFail
+     * @throws \EasySwoole\Mysqli\Exceptions\PrepareQueryFail
+     * @throws \Throwable
      */
-    public function getAll(int $page = 1, string $keyword = null, int $pageSize = 10): array
+    public function getAll(int $page = 1, array $keyword = [], int $pageSize = 10, bool $allowAllField = false): array
     {
         if (!empty($keyword)) {
-            $this->getDb()->where('mobile', '%' . $keyword . '%', 'like');
+            if (isset($keyword['mobile']))
+                $this->getDb()->where('mobile', $keyword['mobile'],'=');
         }
+        $fields = $allowAllField ? '*' : $this->openField;
         $list = $this->getDb()
             ->withTotalCount()
             ->orderBy($this->primaryKey, 'DESC')
-            ->get($this->table, [$pageSize * ($page - 1), $pageSize], implode(',', $this->openField));
+            ->get($this->table, [$pageSize * ($page - 1), $pageSize], $fields);
         $total = $this->getDb()->getTotalCount();
         return ['total' => $total, 'list' => $list];
     }

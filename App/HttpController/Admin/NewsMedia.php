@@ -4,6 +4,7 @@ namespace App\HttpController\Admin;
 
 use App\Bean\NewsMediaBean;
 use App\Model\NewsMediaModel;
+use App\Config\ReturnCode;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\MysqliPool\Mysql;
 use EasySwoole\Validate\Validate;
@@ -33,9 +34,9 @@ class NewsMedia extends Base
 	 * @apiParam {string} charge_name 出账公司名称
 	 * @apiParam {string} department_no 部门编码
 	 * @apiParam {string} department_name 部门名称
-	 * @apiParam {int} order_id 申请人工号
+	 * @apiParam {string} order_id 申请人工号
 	 * @apiParam {string} order_name 申请人姓名
-	 * @apiParam {int} audit_id 审核人工号
+	 * @apiParam {string} audit_id 审核人工号
 	 * @apiParam {string} audit_name 审核人姓名
 	 * @apiParam {string} project_id 费用项目编码
 	 * @apiParam {string} project_name 费用项目名称
@@ -85,14 +86,14 @@ class NewsMedia extends Base
 		$bean->setDescription($param['description']);
 		$bean->setSupplierNo($param['supplier_no']);
 		$bean->setSupplierName($param['supplier_name']);
-		$bean->setCreatedAt($param['created_at']??'');
-		$bean->setUpdatedAt($param['updated_at']??'');
+        $bean->setCreatedAt(date('Y-m-d H:i:s', time()));
+//		$bean->setUpdatedAt($param['updated_at']??'');
 		$rs = $model->add($bean);
 		if ($rs) {
 		    $bean->setId($db->getInsertId());
-		    $this->writeJson(Status::CODE_OK, $bean->toArray(), "success");
+            $this->responseJson(ReturnCode::SUCCESS, '', $bean->toArray());
 		} else {
-		    $this->writeJson(Status::CODE_BAD_REQUEST, [], $db->getLastError());
+            $this->responseJson(ReturnCode::ERROR, $db->getLastError(), []);
 		}
 	}
 
@@ -116,9 +117,9 @@ class NewsMedia extends Base
 	 * @apiParam {string} [charge_name] 出账公司名称
 	 * @apiParam {string} [department_no] 部门编码
 	 * @apiParam {string} [department_name] 部门名称
-	 * @apiParam {int} [order_id] 申请人工号
+	 * @apiParam {string} [order_id] 申请人工号
 	 * @apiParam {string} [order_name] 申请人姓名
-	 * @apiParam {int} [audit_id] 审核人工号
+	 * @apiParam {string} [audit_id] 审核人工号
 	 * @apiParam {string} [audit_name] 审核人姓名
 	 * @apiParam {string} [project_id] 费用项目编码
 	 * @apiParam {string} [project_name] 费用项目名称
@@ -145,7 +146,7 @@ class NewsMedia extends Base
 		$model = new NewsMediaModel($db);
 		$bean = $model->getOne(new NewsMediaBean(['id' => $param['id']]));
 		if (empty($bean)) {
-		    $this->writeJson(Status::CODE_BAD_REQUEST, [], '该数据不存在');
+            $this->responseJson(ReturnCode::RECORD_NOT_FOUND);
 		    return false;
 		}
 		$updateBean = new NewsMediaBean();
@@ -178,9 +179,9 @@ class NewsMedia extends Base
 		$updateBean->setUpdatedAt($param['updated_at']??$bean->getUpdatedAt());
 		$rs = $model->update($bean, $updateBean->toArray([], $updateBean::FILTER_NOT_NULL));
 		if ($rs) {
-		    $this->writeJson(Status::CODE_OK, $rs, "success");
+            $this->responseJson(ReturnCode::SUCCESS, '', $rs);
 		} else {
-		    $this->writeJson(Status::CODE_BAD_REQUEST, [], $db->getLastError());
+            $this->responseJson(ReturnCode::ERROR, $db->getLastError(), []);
 		}
 	}
 
@@ -207,9 +208,9 @@ class NewsMedia extends Base
 		$model = new NewsMediaModel($db);
 		$bean = $model->getOne(new NewsMediaBean(['id' => $param['id']]));
 		if ($bean) {
-		    $this->writeJson(Status::CODE_OK, $bean, "success");
+            $this->responseJson(ReturnCode::SUCCESS, '', $bean);
 		} else {
-		    $this->writeJson(Status::CODE_BAD_REQUEST, [], 'fail');
+            $this->responseJson(ReturnCode::RECORD_NOT_FOUND);
 		}
 	}
 
@@ -238,8 +239,8 @@ class NewsMedia extends Base
 		$page = (int)($param['page']??1);
 		$limit = (int)($param['limit']??20);
 		$model = new NewsMediaModel($db);
-		$data = $model->getAll($page, $param['keyword']??null, $limit);
-		$this->writeJson(Status::CODE_OK, $data, 'success');
+		$data = $model->getAll($page, $param['keyword']??[], $limit);
+        $this->responseJson(ReturnCode::SUCCESS, '', $data);
 	}
 
 
@@ -264,12 +265,16 @@ class NewsMedia extends Base
 		$param = $this->request()->getRequestParam();
 		$model = new NewsMediaModel($db);
 
-		$rs = $model->delete(new NewsMediaBean(['id' => $param['id']]));
-		if ($rs) {
-		    $this->writeJson(Status::CODE_OK, [], "success");
-		} else {
-		    $this->writeJson(Status::CODE_BAD_REQUEST, [], 'fail');
-		}
+
+        $bean = $model->getOne(new NewsMediaBean(['id' => $param['id']]));
+        if (empty($bean)) {
+            $this->responseJson(ReturnCode::RECORD_NOT_FOUND);
+            return false;
+        }
+
+        $rs = $model->delete(new NewsMediaBean(['id' => $param['id']]));
+        $this->responseDefaultJson($rs);
+
 	}
 
 

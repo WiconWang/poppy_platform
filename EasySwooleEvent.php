@@ -11,12 +11,14 @@ namespace EasySwoole\EasySwoole;
 
 use App\Exceptions\ExceptionHandler;
 use EasySwoole\Component\Di;
+use EasySwoole\Component\Pool\Exception\PoolObjectNumError;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
 use EasySwoole\Http\Message\Status;
 use EasySwoole\MysqliPool\MysqlPoolException;
+use EasySwoole\RedisPool\RedisPoolException;
 
 class EasySwooleEvent implements Event
 {
@@ -40,6 +42,23 @@ class EasySwooleEvent implements Event
             \EasySwoole\MysqliPool\Mysql::getInstance()->register('mysql', $mysqlConfig);
         } catch (MysqlPoolException $e) {
             echo "[Warn] --> mysql池注册失败\n";
+        }
+
+
+        $configData = Config::getInstance()->getConf('REDIS');
+        $config = new \EasySwoole\RedisPool\Config($configData);
+// $config->setOptions(['serialize'=>true]);
+        /**
+        这里注册的名字叫redis，你可以注册多个，比如redis2,redis3
+         */
+        try {
+            $poolConf = \EasySwoole\RedisPool\Redis::getInstance()->register('redis', $config);
+            $poolConf->setMaxObjectNum($configData['maxObjectNum']);
+            $poolConf->setMinObjectNum($configData['minObjectNum']);
+        } catch (RedisPoolException $e) {
+            echo "[Warn] --> Redis池注册失败\n";
+        } catch (PoolObjectNumError $e) {
+            echo "[Warn] --> Redis参数设置失败\n";
         }
 
 
